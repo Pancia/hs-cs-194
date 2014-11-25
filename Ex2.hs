@@ -40,18 +40,16 @@ formableBy word hand
 wordsFrom :: Hand -> [String]
 wordsFrom hand = filter (`formableBy` hand) allWords
 
---Borrowing from http://codereview.stackexchange.com/questions/70527/how-many-guards-patterns-is-too-many
-charFitsTemplate :: Char -> Hand -> Char -> (Bool, Hand)
-charFitsTemplate t hand c
-        | t == '?' && elem c hand = (True, delete c hand)
-        | otherwise = (t == c, hand)
-
 wordFitsTemplate :: Template -> Hand -> String -> Bool
-wordFitsTemplate ts _ [] = all (== '?') ts
-wordFitsTemplate tmpl@(t:ts) hand word@(c:cs) =
-        ((length tmpl) == (length word)) && isFit && wordFitsTemplate ts newHand cs
-        where (isFit, newHand) = charFitsTemplate t hand c
-wordFitsTemplate _ _ _ = False
+wordFitsTemplate ts _ [] = all (=='?') ts
+wordFitsTemplate tmpl hand word
+        = fst $ foldl charFitsTemplate
+            ((length tmpl) == (length word), hand)
+            $ zip tmpl word
+        where charFitsTemplate (b, hand) (t, c)
+                | not b = (False, hand)
+                | t == '?' && elem c hand = (True, delete c hand)
+                | otherwise = (t == c, hand)
 
 wordsFittingTemplate t h = filter (wordFitsTemplate t h) allWords
 
