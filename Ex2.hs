@@ -2,6 +2,7 @@ module HW02 where
 
 import Words
 import Data.List
+import Data.Char
 
 -- Though a Scrabble hand is the same Haskell type as a Scrabble word, they
 -- have different properties. Specifically, a hand is unordered whereas a word
@@ -58,4 +59,16 @@ scrabbleValueWord = sum . (map scrabbleValue)
 
 bestWords :: [String] -> [String]
 bestWords words = filter ((== (maximum (map scrabbleValueWord words))) . scrabbleValueWord) words
+
+--scrabbleValueTemplate :: STemplate -> String -> Int
+scrabbleValueTemplate tmpl word
+        = let (val, mult) = foldl charToTemplateValue (0,1) $ zip tmpl word
+              in val * mult
+        where charToTemplateValue (val, mult) (t, c)
+                | t == '?' = (val + scrabbleValue c, mult)
+                | elem t ['2','3'] = (val + scrabbleValue c, (digitToInt t))
+                | t == 'D' = (val + scrabbleValue c * 2, mult)
+                | t == 'T' = (val + scrabbleValue c * 3, mult)
+                | otherwise = (val + scrabbleValue c, mult)
+
 
