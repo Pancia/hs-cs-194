@@ -27,3 +27,14 @@ mod5ParsingWorks = (parse "MkMod 3" == Just (MkMod 3 :: Mod5, "")) &&
                    (addId == (MkMod 0 :: Mod5)) &&
                    (mulId == (MkMod 1 :: Mod5)) &&
                    (addInv (MkMod 2) == (MkMod 3 :: Mod5))
+
+instance Ring Bool where
+        addId  = False
+        addInv = not
+        mulId  = True
+
+        add = (||)
+        mul = (&&)
+
+instance Parsable Bool where
+        parse = listToMaybe . reads
