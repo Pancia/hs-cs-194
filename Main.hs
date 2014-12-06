@@ -1,5 +1,6 @@
 import Data.List
 import Data.List.Split
+import System.Random (randomRIO)
 
 data Cell = Cell { x :: Int
                  , y :: Int
@@ -22,4 +23,15 @@ printMaze board =
                   . chunksOf w
                   . map t
                   $ board
+
+updateInBoard :: (Char -> Char) -> Int -> Int -> Board -> Board
+updateInBoard _ _ _ []       = []
+updateInBoard f x y (c@(Cell x' y' t):cells)
+        | x == x' && y == y' = Cell x y (f t) : cells
+        | otherwise          = c : updateInBoard f x y cells
+
+pick :: Board -> IO Cell
+pick cells = randomRIO (0, length cells - 1)
+             >>= return . (cells !!)
+
 
