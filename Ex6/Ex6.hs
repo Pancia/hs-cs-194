@@ -18,10 +18,9 @@ ynToBool (String "N") = Bool False
 ynToBool v = v
 
 parseData :: B.ByteString -> Either String Value
-parseData bs = Right $ Object $ fmap ynToBool d
-        where (Object d) = case (eitherDecode bs) of
-                             Left  e -> error e
-                             Right r -> r
+parseData bs = case (eitherDecode bs) of
+                   Left  e -> Left $ e ++ "; eitherDecode failed"
+                   Right (Object obj) -> Right $ Object $ fmap ynToBool $ obj
 
 testParseData file =
         B.readFile file >>=
