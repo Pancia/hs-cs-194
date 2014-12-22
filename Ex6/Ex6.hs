@@ -48,10 +48,8 @@ parseMarkets bs = parseData bs >>=
         resultToEitherString . fromJSON
 
 loadData :: IO [Market]
-loadData = do bs <- B.readFile "markets.json"
-              return $ case (parseMarkets bs) of
-                         Left e -> error e
-                         Right r -> r
+loadData = B.readFile "markets.json" >>=
+        return . either error id . parseMarkets
 
 data OrdList a = OrdList { getOrdList :: [a] }
     deriving (Eq, Show)
