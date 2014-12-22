@@ -30,14 +30,8 @@ data Market = Market { marketname :: T.Text
                      , y :: Double
                      , credit :: T.Text
                      , state :: T.Text }
-    deriving (Show, Generic)
+    deriving (Show, Generic, Eq)
 instance FromJSON Market
-instance Eq Market where
-        (==) (Market {x = x, y = y}) (Market {x = x', y = y'})
-            = x == x' && y == y'
-instance Ord Market where
-        compare (Market {y = y1}) (Market {y = y2})
-            = compare y1 y2
 
 resultToEitherString :: Result a -> Either String a
 resultToEitherString (Success a) = Right a
@@ -50,12 +44,6 @@ parseMarkets bs = parseData bs >>=
 loadData :: IO [Market]
 loadData = B.readFile "markets.json" >>=
         return . either error id . parseMarkets
-
-data OrdList a = OrdList { getOrdList :: [a] }
-    deriving (Eq, Show)
-instance Ord a => Monoid (OrdList a) where
-        mempty  = OrdList []
-        mappend (OrdList x) (OrdList y) = OrdList $ sort $ x <> y
 
 type Searcher m = T.Text -> [Market] -> m
 
@@ -76,8 +64,17 @@ allFound = search (:[])
 numberFound :: Searcher Int
 numberFound t mks = length $ allFound t mks
 
+instance Ord Market where
+        compare (Market {y = y1}) (Market {y = y2})
+            = compare y1 y2
+newtype OrdMarkets = OrdMarkets { getOrdMarkets :: [Market] }
+instance Monoid OrdMarkets where
+        mempty = OrdMarkets []
+        mappend (OrdMarkets x) (OrdMarkets y)
+            = OrdMarkets $ sort $ x <> y
+
 orderedNtoS :: Searcher [Market]
-orderedNtoS t mks = getOrdList $ search (OrdList . (:[])) t mks
+orderedNtoS t mks = getOrdMarkets $ search (OrdMarkets . (:[])) t mks
 
 test :: Searcher a -> String -> IO a
 test f t = loadData >>= return . (f (T.pack t))
