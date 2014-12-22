@@ -60,9 +60,7 @@ instance Ord a => Monoid (OrdList a) where
 type Searcher m = T.Text -> [Market] -> m
 
 search :: Monoid m => (Market -> m) -> Searcher m
-search mk_m t = go . filter (T.isInfixOf t . marketname)
-        where go []     = mempty
-              go (n:ns) = mk_m n <> go ns
+search f t = foldr (mappend . f) mempty . filter (T.isInfixOf t . marketname)
 
 firstFound :: Searcher (Maybe Market)
 firstFound t ms = headMay $ search (:[]) t ms
