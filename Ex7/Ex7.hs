@@ -31,8 +31,14 @@ sFromSeed f seed = Cons seed $ sFromSeed f (f seed)
 nats :: Stream Integer
 nats = sFromSeed (+1) 0
 
-interleaveStreams :: Stream a -> Stream a -> Stream a
-interleaveStreams (Cons a s1) s2 = Cons a (interleaveStreams s2 s1)
+sCycle :: [a] -> Stream a
+sCycle [] = error "empty list"
+sCycle cy = sCycle' cy cy
+      where sCycle' cy []     = sCycle' cy cy
+            sCycle' cy (c:cs) = Cons c (sCycle' cy cs)
+
+interleaveS :: Stream a -> Stream a -> Stream a
+interleaveS (Cons a s1) s2 = Cons a (interleaveS s2 s1)
 
 ruler :: Stream Integer
-ruler = interleaveStreams (streamRepeat 0) (streamFromSeed ((+1) . (`rem` 4)) 1)
+ruler = interleaveS (sRepeat 0) (sCycle [1,2,1,3,1,2,1,4])
