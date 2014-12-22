@@ -1,5 +1,7 @@
 module Ex7 where
 
+import System.Random
+
 fib :: Integer -> Integer
 fib n
   | n <= 0 = 0
@@ -42,3 +44,22 @@ interleaveS (Cons a s1) s2 = Cons a (interleaveS s2 s1)
 
 ruler :: Stream Integer
 ruler = interleaveS (sRepeat 0) (sCycle [1,2,1,3,1,2,1,4])
+
+randomList :: (Random a, RandomGen g) => g -> [a]
+randomList g = (\(x, g') -> x : randomList g') (random g)
+
+randomInts :: Int -> [Int]
+randomInts n = take n $ randomList (mkStdGen 5)
+
+--907 MB
+minMax :: [Int] -> Maybe (Int, Int)
+minmax [] = Nothing
+minMax xs = Just (minimum xs, maximum xs)
+
+--994 MB
+minMax' :: [Int] -> Maybe (Int, Int)
+minMax' [] = Nothing
+minMax' xs@(x:_) = Just $ foldl (\(mn, mx) x -> ((min mn x), (max mx x))) (x, x) xs
+
+main :: IO ()
+main = print $ minMax' $ randomInts 1000000
