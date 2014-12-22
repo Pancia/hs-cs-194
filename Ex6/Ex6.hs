@@ -10,7 +10,6 @@ import qualified Data.ByteString.Lazy.Char8 as B
 import qualified Data.Text                  as T
 import qualified Data.Text.IO               as T
 
-import Control.Monad
 import Data.List
 import Safe
 
@@ -79,10 +78,7 @@ allFound = search (:[])
 numberFound :: Searcher Int
 numberFound t mks = length $ allFound t mks
 
-marketToOrdList :: Market -> OrdList Market
-marketToOrdList m = OrdList [m]
-
 orderedNtoS :: Searcher [Market]
-orderedNtoS t mks = getOrdList $ search marketToOrdList t mks
+orderedNtoS t mks = getOrdList $ search (OrdList . (:[])) t mks
 
 test f t = loadData >>= return . (f (T.pack t))
