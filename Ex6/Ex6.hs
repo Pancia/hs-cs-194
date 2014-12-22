@@ -53,16 +53,16 @@ search f t = foldMap f . filterMarkets
               foldMap f = foldr (mappend . f) mempty
 
 firstFound :: Searcher (Maybe Market)
-firstFound t ms = headMay $ search (:[]) t ms
+firstFound = fmap headMay . search (:[])
 
 lastFound :: Searcher (Maybe Market)
-lastFound t ms = lastMay $ search (:[]) t ms
+lastFound = fmap lastMay . search (:[])
 
 allFound :: Searcher [Market]
 allFound = search (:[])
 
 numberFound :: Searcher Int
-numberFound t mks = length $ allFound t mks
+numberFound = fmap length . allFound
 
 instance Ord Market where
         compare (Market {y = y1}) (Market {y = y2})
