@@ -60,7 +60,9 @@ instance Ord a => Monoid (OrdList a) where
 type Searcher m = T.Text -> [Market] -> m
 
 search :: Monoid m => (Market -> m) -> Searcher m
-search f t = foldr (mappend . f) mempty . filter (T.isInfixOf t . marketname)
+search f t = foldMap f . filterMarkets
+        where filterMarkets = filter (T.isInfixOf t . marketname)
+              foldMap f = foldr (mappend . f) mempty
 
 firstFound :: Searcher (Maybe Market)
 firstFound t ms = headMay $ search (:[]) t ms
@@ -77,4 +79,5 @@ numberFound t mks = length $ allFound t mks
 orderedNtoS :: Searcher [Market]
 orderedNtoS t mks = getOrdList $ search (OrdList . (:[])) t mks
 
+test :: Searcher a -> String -> IO a
 test f t = loadData >>= return . (f (T.pack t))
