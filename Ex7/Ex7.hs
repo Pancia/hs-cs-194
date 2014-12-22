@@ -14,22 +14,22 @@ fibs2 = [1,1] ++ zipWith (+) fibs2 (tail fibs2)
 
 data Stream a = Cons a (Stream a)
 instance Show a => Show (Stream a) where
-        show = show . take 42 . streamToList
+        show = show . take 42 . sToList
 
-streamToList :: Stream a -> [a]
-streamToList (Cons a s) = a : streamToList s
+sToList :: Stream a -> [a]
+sToList (Cons a s) = a : sToList s
 
-streamRepeat :: a -> Stream a
-streamRepeat x = Cons x (streamRepeat x)
+sRepeat :: a -> Stream a
+sRepeat x = Cons x (sRepeat x)
 
-streamMap :: (a -> b) -> Stream a -> Stream b
-streamMap f (Cons a s) = Cons (f a) (streamMap f s)
+sMap :: (a -> b) -> Stream a -> Stream b
+sMap f (Cons a s) = Cons (f a) (sMap f s)
 
-streamFromSeed :: (a -> a) -> a -> Stream a
-streamFromSeed f seed = Cons seed $ streamFromSeed f (f seed)
+sFromSeed :: (a -> a) -> a -> Stream a
+sFromSeed f seed = Cons seed $ sFromSeed f (f seed)
 
 nats :: Stream Integer
-nats = streamFromSeed (+1) 0
+nats = sFromSeed (+1) 0
 
 interleaveStreams :: Stream a -> Stream a -> Stream a
 interleaveStreams (Cons a s1) s2 = Cons a (interleaveStreams s2 s1)
