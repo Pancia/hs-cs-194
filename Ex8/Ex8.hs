@@ -61,7 +61,7 @@ battle bef@(ArmyCounts atks defs)
 invade :: ArmyCounts -> StdRand ArmyCounts
 invade bef@(ArmyCounts atks defs)
         | defs > 0 && atks > 1 = battle bef >>= invade
-        | otherwise = return bef
+        | otherwise            = return bef
 
 (//) :: Int -> Int -> Double
 a // b = fromIntegral a / fromIntegral b
@@ -77,3 +77,4 @@ successProb ac = (invasions 10000 ac) >>=
                  filterM (return . successful) >>=
                  return . (//10000) . length
 
+--evalRandIO $ successProb (ArmyCounts 9 5) ~= 0.82
