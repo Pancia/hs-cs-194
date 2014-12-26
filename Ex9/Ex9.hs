@@ -5,6 +5,8 @@ import BST
 import Control.Applicative
 import System.Random
 import Control.Monad
+import Test.HUnit
+import Parser
 
 instance Arbitrary Mod5 where
         arbitrary = genMod5
@@ -158,3 +160,14 @@ genBST lower upper n
                                         Node <$> (genBST lower (x-1) n)
                                              <*> return x
                                              <*> (genBST (x+1) upper n))]
+
+parserTests :: Test
+parserTests = TestList ["single parse" ~:
+                        parse "MkMod 1"
+                        ~?= Just (MkMod 1, "")
+                       ,"parseRing with overflowing +" ~:
+                        parseRing "MkMod 3 + MkMod 2"
+                        ~?= Just (MkMod 0)
+                       ,"parseRing with overflowing *" ~:
+                        parseRing "MkMod 3 * MkMod 3"
+                        ~?= Just (MkMod 4)]
