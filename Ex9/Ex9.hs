@@ -1,6 +1,10 @@
 import Ex5
 import Ring
 import Test.QuickCheck
+import BST
+import Control.Applicative
+import System.Random
+import Control.Monad
 
 instance Arbitrary Mod5 where
         arbitrary = genMod5
@@ -97,12 +101,57 @@ prop8Mod5 = prop8
 prop8Mat2x2 :: Mat2x2 -> Mat2x2 -> Mat2x2 -> Bool
 prop8Mat2x2 = prop8
 
-prop_ringMod5 :: Property
-prop_ringMod5 = conjoin [prop2Mod5, prop3Mod5, prop6Mod5] -- 1 Mod5
-           .&&. conjoin [prop4Mod5] -- 2 Mod5
-           .&&. conjoin [prop1Mod5, prop5Mod5, prop7Mod5, prop8Mod5] -- 3 Mod5
+propRingMod5 :: Property
+propRingMod5 = conjoin [prop2Mod5, prop3Mod5, prop6Mod5] -- 1 Mod5
+          .&&. conjoin [prop4Mod5] -- 2 Mod5
+          .&&. conjoin [prop1Mod5, prop5Mod5, prop7Mod5, prop8Mod5] -- 3 Mod5
 
-prop_ringMat2x2 :: Property
-prop_ringMat2x2 = conjoin [prop2Mat2x2, prop3Mat2x2, prop6Mat2x2] -- 1 Mat2x2
-             .&&. conjoin [prop4Mat2x2] -- 2 Mat2x2
-             .&&. conjoin [prop1Mat2x2, prop5Mat2x2, prop7Mat2x2, prop8Mat2x2] -- 3 Mat2x2
+propRingMat2x2 :: Property
+propRingMat2x2 = conjoin [prop2Mat2x2, prop3Mat2x2, prop6Mat2x2] -- 1 Mat2x2
+            .&&. conjoin [prop4Mat2x2] -- 2 Mat2x2
+            .&&. conjoin [prop1Mat2x2, prop5Mat2x2, prop7Mat2x2, prop8Mat2x2] -- 3 Mat2x2
+
+-- | Is the tree a BST between the given endpoints?
+isBSTBetween :: Ord a => Maybe a -> Maybe a -> BST a -> Bool
+isBSTBetween _       _       Leaf = True
+isBSTBetween m_lower m_upper (Node left x right)
+    = isBSTBetween m_lower  (Just x) left  &&
+      isBSTBetween (Just x) m_upper  right &&
+      maybe True (<x) m_lower &&
+      maybe True (>x) m_upper
+
+-- | Is this a valid BST?
+isBST :: Ord a => BST a -> Bool
+isBST = isBSTBetween Nothing Nothing
+
+-- | Allows for pretty/indented printing of BST's
+--instance (Show a) => Show (BST a) where
+--        show bst = showBST (0, bst)
+
+--showBST (d, Leaf) = (take d (repeat ' ')) ++ "Leaf"
+--showBST (d, (Node l x r)) = (take d (repeat ' ')) ++ "Node " ++ show x
+--                         ++ "\n" ++ showBST (d+2, l)
+--                         ++ "\n" ++ showBST (d+2, r)
+
+countBST :: BST a -> Int
+countBST Leaf = 0
+countBST (Node l x r) = 1 + countBST l + countBST r
+
+insertBST :: Ord a => a -> BST a -> BST a
+insertBST i (Leaf) = Node (Leaf) i (Leaf)
+insertBST i bst@(Node l a r)
+        | i < a = Node (insertBST i l) a r
+        | i > a = Node l a (insertBST i r)
+        | otherwise = bst
+
+instance (Random a, Num a, Eq a, Ord a) => Arbitrary (BST a) where
+        arbitrary = sized (genBST 0 1000)
+
+genBST :: (Random a, Num a, Eq a, Ord a) => a -> a -> Int -> Gen (BST a)
+genBST lower upper n
+        | abs (lower - upper) < 2 = return Leaf
+        | otherwise = frequency [(1, return Leaf)
+                                ,(n, do x <- choose (lower, upper)
+                                        Node <$> (genBST lower (x-1) n)
+                                             <*> return x
+                                             <*> (genBST (x+1) upper n))]
