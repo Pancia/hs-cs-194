@@ -144,6 +144,9 @@ insertBST i bst@(Node l a r)
         | i > a = Node l a (insertBST i r)
         | otherwise = bst
 
+-- | To test in ghci use the following:
+-- | (sample' (arbitrary :: Gen (BST Int)))
+-- | append a ">>= ..." to thread it into other fns
 instance (Random a, Num a, Eq a, Ord a) => Arbitrary (BST a) where
         arbitrary = sized (genBST 0 1000)
 
