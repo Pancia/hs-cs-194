@@ -128,12 +128,14 @@ isBST = isBSTBetween Nothing Nothing
 
 -- | Allows for pretty/indented printing of BST's
 --instance (Show a) => Show (BST a) where
---        show bst = showBST (0, bst)
+--        show bst = showBST bst
 
---showBST (d, Leaf) = (take d (repeat ' ')) ++ "Leaf"
---showBST (d, (Node l x r)) = (take d (repeat ' ')) ++ "Node " ++ show x
---                         ++ "\n" ++ showBST (d+2, l)
---                         ++ "\n" ++ showBST (d+2, r)
+showBST bst = showBST' (0, bst)
+
+showBST' (d, Leaf) = (take d (repeat ' ')) ++ "Leaf"
+showBST' (d, (Node l x r)) = (take d (repeat ' ')) ++ "Node " ++ show x
+                         ++ "\n" ++ showBST (d+2, l)
+                         ++ "\n" ++ showBST (d+2, r)
 
 countBST :: BST a -> Int
 countBST Leaf = 0
